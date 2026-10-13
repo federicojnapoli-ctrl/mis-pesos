@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14171c">
+<title>Rutina 2 días</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root{
+    --bg:#14171c;
+    --panel:#1d222a;
+    --panel-2:#252b35;
+    --line:#333b47;
+    --ink:#eef1f5;
+    --ink-dim:#8d97a6;
+    --brass:#e3a13c;
+    --dia-a:#3c5488;
+    --dia-b:#5e7548;
+    --up:#5fbf7f;
+    --down:#d97070;
+    --tile:#f1eee6;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+  }
+  button,input,select{font:inherit;color:inherit}
+  button{background:none;border:0;cursor:pointer}
+
+  header{
+    position:sticky;top:0;z-index:20;background:var(--bg);
+    border-bottom:1px solid var(--line);
+    padding:calc(12px + env(safe-area-inset-top)) 16px 0;
+  }
+  .titulo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
+  .titulo h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-0.02em}
+  .bajada{font-size:12px;color:var(--ink-dim);margin-bottom:10px}
+  .menu-btn{font-size:20px;color:var(--ink-dim);padding:4px 8px;line-height:1}
+  nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{
+    flex:0 0 auto;padding:8px 16px;border-radius:999px;
+    background:var(--panel);border:1px solid var(--line);
+    color:var(--ink-dim);font-size:15px;font-weight:600;
+  }
+  nav button[aria-current="true"]{color:#fff}
+  nav button[data-dia="A"][aria-current="true"]{background:var(--dia-a);border-color:var(--dia-a)}
+  nav button[data-dia="B"][aria-current="true"]{background:var(--dia-b);border-color:var(--dia-b)}
+  nav button[data-dia="G"][aria-current="true"]{background:var(--brass);border-color:var(--brass);color:#1a1509}
+
+  main{padding:14px 16px 120px;display:flex;flex-direction:column;gap:12px}
+
+  .cinta{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;border-radius:var(--radius);
+    font-size:13px;color:#dfe6f2;
+  }
+  .cinta.a{background:var(--dia-a)}
+  .cinta.b{background:var(--dia-b)}
+  .cinta b{font-size:15px;color:#fff}
+
+  .ej{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+  .ej.prioridad{border-color:var(--brass)}
+  .ej-top{display:flex;gap:12px;align-items:flex-start}
+  .thumb{
+    width:60px;height:60px;flex:0 0 auto;border-radius:10px;
+    background:var(--tile);padding:3px;
+  }
+  .thumb svg{display:block}
+  .ej-datos{flex:1;min-width:0}
+  .ej-nombre{font-size:16px;font-weight:700;letter-spacing:-0.01em}
+  .ej-musculo{font-size:12.5px;color:var(--ink-dim);margin-top:2px}
+  .etiqueta{
+    display:inline-block;margin-left:6px;vertical-align:1px;
+    font-size:10px;font-weight:700;letter-spacing:.04em;
+    color:#1a1509;background:var(--brass);
+    padding:2px 6px;border-radius:5px;
+  }
+  .ej-menu{color:var(--ink-dim);font-size:18px;padding:0 4px;line-height:1;align-self:flex-start}
+
+  .plan{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .reps{
+    font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;
+    background:var(--panel-2);border:1px solid var(--line);
+    padding:5px 10px;border-radius:9px;
+  }
+  .desc{
+    font-size:13px;color:var(--ink-dim);
+    background:transparent;border:1px solid var(--line);
+    padding:5px 10px;border-radius:9px;
+  }
+  .desc:active{border-color:var(--brass);color:var(--brass)}
+
+  .fila{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .paso-btn{
+    width:62px;height:62px;flex:0 0 auto;border-radius:16px;
+    background:var(--panel-2);border:1px solid var(--line);
+    font-size:28px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .paso-btn:active{background:var(--brass);color:#1a1509;border-color:var(--brass)}
+  .peso{flex:1;text-align:center;padding:4px 0}
+  .peso b{display:block;font-size:40px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.03em}
+  .peso span{display:block;font-size:12px;color:var(--ink-dim);margin-top:4px}
+
+  .ej-pie{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-top:10px;padding-top:9px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--ink-dim);
+  }
+  .delta{font-weight:700;font-variant-numeric:tabular-nums}
+  .delta.sube{color:var(--up)}
+  .delta.baja{color:var(--down)}
+  .ver-hist{color:var(--brass);font-size:13px;font-weight:600}
+  .hist{margin-top:8px;display:none}
+  .hist.abierta{display:block}
+  .hist ul{list-style:none;margin:0;padding:0}
+  .hist li{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:var(--ink-dim);border-bottom:1px solid var(--panel-2)}
+  .hist li b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .sumar{
+    border:1px dashed var(--line);border-radius:var(--radius);
+    padding:14px;color:var(--ink-dim);font-size:14px;font-weight:600;text-align:center;
+  }
+
+  /* ---- guía ---- */
+  .bloque{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+  .bloque h2{margin:0 0 10px;font-size:15px;font-weight:700}
+  .bloque p{margin:0 0 8px;font-size:14px;color:#cdd5e0}
+  .bloque p:last-child{margin-bottom:0}
+  .bloque ul{margin:0;padding-left:18px;font-size:14px;color:#cdd5e0}
+  .bloque li{margin-bottom:5px}
+  .semana{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:10px}
+  .dia{
+    border-radius:9px;padding:8px 2px;text-align:center;
+    background:var(--panel-2);border:1px solid var(--line);
+  }
+  .dia small{display:block;font-size:10.5px;color:var(--ink-dim)}
+  .dia b{display:block;font-size:15px;margin-top:3px;font-weight:800}
+  .dia i{display:block;font-size:10.5px;font-style:normal;color:var(--ink-dim);margin-top:3px}
+  .dia.on-a{background:var(--dia-a);border-color:var(--dia-a)}
+  .dia.on-b{background:var(--dia-b);border-color:var(--dia-b)}
+  .dia.on-a small,.dia.on-b small{color:#dfe6f2}
+  .fichas{display:flex;gap:8px;margin-bottom:12px}
+  .ficha{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:12px;text-align:center}
+  .ficha b{display:block;font-size:22px;font-weight:800}
+  .ficha small{font-size:11.5px;color:var(--ink-dim)}
+
+  /* ---- cronómetro de descanso ---- */
+  .crono{
+    position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));
+    background:var(--brass);color:#1a1509;border-radius:16px;
+    padding:12px 16px;display:none;align-items:center;justify-content:space-between;gap:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:30;
+  }
+  .crono.visible{display:flex}
+  .crono .cuenta{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .crono .que{font-size:12px;font-weight:600;opacity:.75}
+  .crono button{font-size:14px;font-weight:700;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.14)}
+
+  /* ---- modales ---- */
+  .fondo{position:fixed;inset:0;background:rgba(8,10,13,.72);display:none;align-items:flex-end;justify-content:center;z-index:40}
+  .fondo.abierto{display:flex}
+  .modal{
+    width:100%;max-width:520px;background:var(--panel);
+    border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;
+    padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+    max-height:88vh;overflow:auto;
+  }
+  .modal h2{margin:0 0 14px;font-size:18px;font-weight:700}
+  .modal .nota{font-size:13px;color:var(--ink-dim);margin:-8px 0 14px}
+  .campo{margin-bottom:12px}
+  .campo label{display:block;font-size:13px;color:var(--ink-dim);margin-bottom:5px}
+  .campo input,.campo select{width:100%;padding:12px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line)}
+  .campo input:focus,.campo select:focus{outline:2px solid var(--brass);outline-offset:1px}
+  .duo{display:flex;gap:10px}
+  .duo>*{flex:1}
+  .acciones{display:flex;gap:10px;margin-top:14px}
+  .acciones button{flex:1;height:48px;border-radius:12px;font-weight:700;background:var(--panel-2);border:1px solid var(--line)}
+  .acciones .ok{background:var(--brass);color:#1a1509;border-color:var(--brass)}
+  .acciones .borrar{background:transparent;color:var(--down);border-color:var(--down)}
+  .aviso{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(92px + env(safe-area-inset-bottom));
+    background:var(--panel-2);border:1px solid var(--line);
+    padding:10px 16px;border-radius:999px;font-size:14px;
+    opacity:0;pointer-events:none;transition:opacity .18s;z-index:50;
+  }
+  .aviso.visible{opacity:1}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="titulo">
+    <h1>Rutina 2 días</h1>
+    <button class="menu-btn" id="btnAjustes" aria-label="Ajustes">⋯</button>
+  </div>
+  <div class="bajada">Cuerpo completo · foco en hombros y espalda para la forma en V</div>
+  <nav id="nav">
+    <button data-dia="A">Día A</button>
+    <button data-dia="B">Día B</button>
+    <button data-dia="G">Guía</button>
+  </nav>
+</header>
+
+<main id="lista"></main>
+
+<div class="crono" id="crono">
+  <div>
+    <div class="que" id="cronoQue">Descanso</div>
+    <div class="cuenta" id="cronoCuenta">0:00</div>
+  </div>
+  <button id="cronoCortar">Listo</button>
+</div>
+
+<div class="aviso" id="aviso"></div>
+
+<!-- ajustes de un ejercicio -->
+<div class="fondo" id="fondoEj">
+  <div class="modal">
+    <h2 id="tituloEj">Ejercicio</h2>
+    <div class="campo" id="campoNombre">
+      <label for="fNombre">Nombre</label>
+      <input id="fNombre" type="text" autocomplete="off">
+    </div>
+    <div class="duo">
+      <div class="campo">
+        <label for="fUnidad">Unidad</label>
+        <select id="fUnidad">
+          <option value="kg">kg</option>
+          <option value="placas">placas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="fPaso">Suma cada toque</label>
+        <input id="fPaso" type="number" inputmode="decimal" step="0.5">
+      </div>
+    </div>
+    <div class="campo">
+      <label for="fPesoEj">Peso actual</label>
+      <input id="fPesoEj" type="number" inputmode="decimal" step="0.5">
+    </div>
+    <div class="acciones">
+      <button id="btnCancelarEj">Cancelar</button>
+      <button class="ok" id="btnGuardarEj">Guardar</button>
+    </div>
+    <div class="acciones" id="filaBorrar" style="display:none">
+      <button class="borrar" id="btnBorrarEj">Borrar ejercicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- alta de ejercicio extra -->
+<div class="fondo" id="fondoNuevo">
+  <div class="modal">
+    <h2>Ejercicio extra</h2>
+    <p class="nota">Se suma al final del día, sin tocar la rutina original.</p>
+    <div class="campo">
+      <label for="nNombre">Ejercicio</label>
+      <input id="nNombre" type="text" placeholder="Curl martillo" autocomplete="off">
+    </div>
+    <div class="campo">
+      <label for="nMusculo">Músculo o detalle</label>
+      <input id="nMusculo" type="text" placeholder="Brazos" autocomplete="off">
+    </div>
+    <div class="duo">
+      <div class="campo">
+        <label for="nReps">Series × reps</label>
+        <input id="nReps" type="text" placeholder="3 × 10-12" autocomplete="off">
+      </div>
+      <div class="campo">
+        <label for="nDesc">Descanso</label>
+        <input id="nDesc" type="text" placeholder="60 s" autocomplete="off">
+      </div>
+    </div>
+    <div class="duo">
+      <div class="campo">
+        <label for="nPeso">Peso inicial</label>
+        <input id="nPeso" type="number" inputmode="decimal" step="0.5" value="0">
+      </div>
+      <div class="campo">
+        <label for="nPaso">Suma cada toque</label>
+        <input id="nPaso" type="number" inputmode="decimal" step="0.5" value="2">
+      </div>
+    </div>
+    <div class="acciones">
+      <button id="btnCancelarNuevo">Cancelar</button>
+      <button class="ok" id="btnGuardarNuevo">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- peso exacto -->
+<div class="fondo" id="fondoPeso">
+  <div class="modal">
+    <h2 id="tituloPeso">Peso</h2>
+    <div class="campo">
+      <label for="fPesoExacto">Escribí el peso</label>
+      <input id="fPesoExacto" type="number" inputmode="decimal" step="0.5">
+    </div>
+    <div class="acciones">
+      <button id="btnCancelarPeso">Cancelar</button>
+      <button class="ok" id="btnGuardarPeso">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- respaldo -->
+<div class="fondo" id="fondoAjustes">
+  <div class="modal">
+    <h2>Copia de seguridad</h2>
+    <p class="nota">Los pesos viven en este teléfono. Copiá el respaldo cada tanto para no perderlos si borrás los datos del navegador.</p>
+    <div class="campo">
+      <label for="fBackup">Respaldo</label>
+      <input id="fBackup" type="text" readonly value="">
+    </div>
+    <div class="acciones">
+      <button id="btnCopiar">Copiar respaldo</button>
+      <button id="btnRestaurar">Restaurar</button>
+    </div>
+    <div class="acciones">
+      <button id="btnCerrarAjustes">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var CLAVE = "pesos_v2";
+  var FIG = {"a1": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><circle cx=\"43\" cy=\"29\" r=\"9\" stroke=\"#1F2A44\"></circle><circle cx=\"31\" cy=\"25\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"38,32 46,50 30,54 34,71\"></polyline><polyline points=\"37,34 43,29\"></polyline></svg>", "a2": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"12,11 68,11\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline><circle cx=\"40\" cy=\"27\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"28,12 34,34 46,34 52,12\"></polyline><polyline points=\"40,33 40,52\"></polyline><polyline points=\"36,69 40,52 44,69\"></polyline></svg>", "a3": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"62,55 40,55 22,36\" stroke=\"#1F2A44\"></polyline><polyline points=\"44,55 44,72\" stroke=\"#1F2A44\"></polyline><polyline points=\"58,55 58,72\" stroke=\"#1F2A44\"></polyline><circle cx=\"22\" cy=\"29\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"26,35 43,51 58,50 60,71\"></polyline><polyline points=\"31,40 31,19\"></polyline><polyline points=\"24,16 38,16\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline></svg>", "a4": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"28,58 52,58\" stroke=\"#1F2A44\"></polyline><polyline points=\"31,58 31,72\" stroke=\"#1F2A44\"></polyline><polyline points=\"49,58 49,72\" stroke=\"#1F2A44\"></polyline><circle cx=\"40\" cy=\"22\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"40,28 40,52\"></polyline><polyline points=\"28,10 30,32 50,32 52,10\"></polyline><polyline points=\"23,8 33,8\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline><polyline points=\"47,8 57,8\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline><polyline points=\"30,70 32,55 40,52 48,55 50,70\"></polyline></svg>", "a5": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><circle cx=\"40\" cy=\"17\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"40,23 40,48\"></polyline><polyline points=\"12,30 30,28 50,28 68,30\"></polyline><polyline points=\"12,24 12,36\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline><polyline points=\"68,24 68,36\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline><polyline points=\"30,28 26,46\" stroke=\"#9A968C\" stroke-dasharray=\"3 4\"></polyline><polyline points=\"50,28 54,46\" stroke=\"#9A968C\" stroke-dasharray=\"3 4\"></polyline><polyline points=\"34,70 40,48 46,70\"></polyline></svg>", "a8": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"70,6 70,73\" stroke=\"#9A968C\"></polyline><polyline points=\"48,17 70,17\" stroke=\"#9A968C\" stroke-width=\"2\"></polyline><polyline points=\"48,12 48,22\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline><circle cx=\"38\" cy=\"24\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"38,30 38,52\"></polyline><polyline points=\"38,32 27,18 46,17\"></polyline><polyline points=\"34,71 38,52 44,71\"></polyline></svg>", "a6": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><circle cx=\"40\" cy=\"16\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"40,22 40,48\"></polyline><polyline points=\"40,26 40,40 52,30\"></polyline><polyline points=\"52,24 52,36\" stroke=\"#1F2A44\" stroke-width=\"4\"></polyline><polyline points=\"40,40 44,54\" stroke=\"#9A968C\" stroke-dasharray=\"3 4\"></polyline><polyline points=\"36,70 40,48 44,70\"></polyline></svg>", "a7": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><circle cx=\"17\" cy=\"44\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"24,49 66,64 68,71\"></polyline><polyline points=\"25,50 25,71 36,71\"></polyline></svg>", "b1": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><circle cx=\"22\" cy=\"30\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"28,34 50,40 48,56 50,71\"></polyline><polyline points=\"31,36 34,56\"></polyline><circle cx=\"34\" cy=\"62\" r=\"9\" stroke=\"#4B5D3A\"></circle></svg>", "b2": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><circle cx=\"22\" cy=\"28\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"28,32 50,42 46,56 50,71\"></polyline><polyline points=\"31,35 38,46\"></polyline><circle cx=\"38\" cy=\"51\" r=\"8\" stroke=\"#4B5D3A\"></circle><polyline points=\"38,62 38,70\" stroke=\"#9A968C\" stroke-dasharray=\"3 4\"></polyline></svg>", "b3": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"14,52 62,52\" stroke=\"#4B5D3A\"></polyline><polyline points=\"22,52 22,72\" stroke=\"#4B5D3A\"></polyline><polyline points=\"56,52 56,72\" stroke=\"#4B5D3A\"></polyline><circle cx=\"18\" cy=\"45\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"24,47 46,47 60,48 62,71\"></polyline><polyline points=\"31,47 31,26\"></polyline><circle cx=\"31\" cy=\"20\" r=\"8\" stroke=\"#4B5D3A\"></circle></svg>", "b4": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"40,2 40,29\" stroke=\"#9A968C\" stroke-width=\"2\"></polyline><polyline points=\"16,30 64,30\" stroke=\"#4B5D3A\" stroke-width=\"4\"></polyline><circle cx=\"40\" cy=\"19\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"40,25 40,54\"></polyline><polyline points=\"20,31 22,42 32,34 48,34 58,42 60,31\"></polyline><polyline points=\"28,56 52,56\" stroke=\"#4B5D3A\"></polyline><polyline points=\"36,56 34,71\"></polyline><polyline points=\"44,56 46,71\"></polyline></svg>", "b5": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><circle cx=\"40\" cy=\"17\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"40,23 40,48\"></polyline><polyline points=\"12,30 30,28 50,28 68,30\"></polyline><polyline points=\"12,24 12,36\" stroke=\"#4B5D3A\" stroke-width=\"4\"></polyline><polyline points=\"68,24 68,36\" stroke=\"#4B5D3A\" stroke-width=\"4\"></polyline><polyline points=\"30,28 26,46\" stroke=\"#9A968C\" stroke-dasharray=\"3 4\"></polyline><polyline points=\"50,28 54,46\" stroke=\"#9A968C\" stroke-dasharray=\"3 4\"></polyline><polyline points=\"34,70 40,48 46,70\"></polyline></svg>", "b6": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"70,6 70,73\" stroke=\"#9A968C\"></polyline><polyline points=\"48,17 70,17\" stroke=\"#9A968C\" stroke-width=\"2\"></polyline><polyline points=\"48,12 48,22\" stroke=\"#4B5D3A\" stroke-width=\"4\"></polyline><circle cx=\"38\" cy=\"24\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"38,30 38,52\"></polyline><polyline points=\"38,32 27,18 46,17\"></polyline><polyline points=\"34,71 38,52 44,71\"></polyline></svg>", "b7": "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 80 80\" fill=\"none\" stroke=\"#1C1F24\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"8\" y1=\"73\" x2=\"72\" y2=\"73\" stroke=\"#9A968C\" stroke-width=\"2\"></line><polyline points=\"66,6 66,73\" stroke=\"#9A968C\"></polyline><polyline points=\"50,8 66,8\" stroke=\"#9A968C\" stroke-width=\"2\"></polyline><circle cx=\"50\" cy=\"8\" r=\"3\" stroke=\"#9A968C\" stroke-width=\"2\"></circle><polyline points=\"50,11 50,51\" stroke=\"#9A968C\" stroke-width=\"2\"></polyline><circle cx=\"38\" cy=\"18\" r=\"5\" fill=\"#1C1F24\"></circle><polyline points=\"38,24 38,48\"></polyline><polyline points=\"38,27 40,40 50,52\"></polyline><polyline points=\"46,53 54,57\" stroke=\"#4B5D3A\" stroke-width=\"4\"></polyline><polyline points=\"40,40 52,34\" stroke=\"#9A968C\" stroke-dasharray=\"3 4\"></polyline><polyline points=\"34,70 38,48 44,70\"></polyline></svg>"};
+
+  // Rutina del plan. Orden, series y descansos no se editan desde la app.
+  // Los id NO se renumeran nunca: el historial guardado está atado a ellos.
+  var RUTINA = {
+    A: {
+      titulo:"Día A", foco:"Sentadilla · Dominadas · Empuje",
+      ejercicios:[
+        {id:"a1", nombre:"Sentadilla", musculo:"Piernas · barra o goblet", reps:"3 × 6–10", desc:"2 min", seg:120, unidad:"kg", paso:5},
+        {id:"a2", nombre:"Dominadas o jalón al pecho", musculo:"Espalda (ancho)", reps:"3 × 6–10", desc:"2 min", seg:120, unidad:"kg", paso:5},
+        {id:"a3", nombre:"Press inclinado con mancuernas", musculo:"Pecho superior", reps:"3 × 8–12", desc:"90 s", seg:90, unidad:"kg", paso:2},
+        {id:"a4", nombre:"Press militar con mancuernas", musculo:"Hombros · sentado", reps:"3 × 8–12", desc:"90 s", seg:90, unidad:"kg", paso:2},
+        {id:"a5", nombre:"Elevaciones laterales", musculo:"Hombro lateral · da el ancho", reps:"4 × 12–15", desc:"60 s", seg:60, unidad:"kg", paso:1, prioridad:true},
+        {id:"a8", nombre:"Face pulls", musculo:"Hombro posterior · postura", reps:"2 × 12–15", desc:"60 s", seg:60, unidad:"kg", paso:5, prioridad:true},
+        {id:"a6", nombre:"Curl de bíceps con mancuernas", musculo:"Brazos", reps:"2 × 10–12", desc:"60 s", seg:60, unidad:"kg", paso:2},
+        {id:"a7", nombre:"Plancha", musculo:"Core · apoyo en antebrazos", reps:"3 × 30–45 s", desc:"45 s", seg:45, unidad:"kg", paso:2.5}
+      ]
+    },
+    B: {
+      titulo:"Día B", foco:"Bisagra · Remo · Banca",
+      ejercicios:[
+        {id:"b1", nombre:"Peso muerto rumano", musculo:"Isquios y glúteos", reps:"3 × 8–10", desc:"2 min", seg:120, unidad:"kg", paso:5},
+        {id:"b2", nombre:"Remo con barra o en máquina", musculo:"Espalda (grosor)", reps:"3 × 8–12", desc:"90 s", seg:90, unidad:"kg", paso:5},
+        {id:"b3", nombre:"Press de banca", musculo:"Pecho · barra o mancuernas", reps:"4 × 6–10", desc:"2 min", seg:120, unidad:"kg", paso:5},
+        {id:"b4", nombre:"Jalón al pecho agarre neutro", musculo:"Espalda (ancho)", reps:"3 × 10–12", desc:"90 s", seg:90, unidad:"kg", paso:5},
+        {id:"b5", nombre:"Elevaciones laterales", musculo:"Polea o mancuerna", reps:"4 × 12–15", desc:"60 s", seg:60, unidad:"kg", paso:1, prioridad:true},
+        {id:"b6", nombre:"Face pulls", musculo:"Hombro posterior · postura", reps:"3 × 12–15", desc:"60 s", seg:60, unidad:"kg", paso:5, prioridad:true},
+        {id:"b7", nombre:"Extensión de tríceps en polea", musculo:"Brazos", reps:"2 × 10–12", desc:"60 s", seg:60, unidad:"kg", paso:5}
+      ]
+    }
+  };
+
+  var SEMANA = [
+    {d:"Lun", v:"A"}, {d:"Mar", v:"caminar"}, {d:"Mié", v:"—"}, {d:"Jue", v:"B"},
+    {d:"Vie", v:"caminar"}, {d:"Sáb", v:"—"}, {d:"Dom", v:"—"}
+  ];
+
+  var estado = cargar();
+  var vista = estado.vista || "A";
+  var editandoId = null, pesoId = null, abiertos = {};
+
+  // ---------- datos ----------
+  function nuevoId(){ return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+  function base(){ return {v:2, vista:"A", datos:{}, extras:[]}; }
+
+  function cargar(){
+    try{
+      var crudo = localStorage.getItem(CLAVE);
+      if(crudo){
+        var d = JSON.parse(crudo);
+        if(d && d.datos) { d.extras = d.extras || []; return d; }
+      }
+    }catch(e){}
+    return migrar();
+  }
+
+  // si existe la versión anterior, rescata los pesos que coincidan por nombre
+  function migrar(){
+    var nuevo = base();
+    try{
+      var viejo = localStorage.getItem("pesos_v1");
+      if(!viejo) return nuevo;
+      var d = JSON.parse(viejo);
+      if(!d || !Array.isArray(d.ejercicios)) return nuevo;
+      var porNombre = {};
+      d.ejercicios.forEach(function(e){ porNombre[normalizar(e.nombre)] = e; });
+      todos().forEach(function(ej){
+        var v = porNombre[normalizar(ej.nombre)];
+        if(v && typeof v.peso === "number"){
+          nuevo.datos[ej.id] = {peso:v.peso, unidad:v.unidad||"kg", paso:v.paso||ej.paso, hist:(v.hist||[]).slice(-40)};
+        }
+      });
+    }catch(e){}
+    return nuevo;
+  }
+
+  function normalizar(s){
+    return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"");
+  }
+
+  function guardar(){
+    estado.vista = vista;
+    try{ localStorage.setItem(CLAVE, JSON.stringify(estado)); }
+    catch(e){ avisar("No se pudo guardar en este navegador"); }
+  }
+
+  function todos(){
+    return RUTINA.A.ejercicios.concat(RUTINA.B.ejercicios);
+  }
+
+  function ejerciciosDe(dia){
+    var fijos = RUTINA[dia] ? RUTINA[dia].ejercicios : [];
+    var extra = estado.extras.filter(function(e){ return e.dia === dia; });
+    return fijos.concat(extra);
+  }
+
+  function buscar(id){
+    var lista = todos().concat(estado.extras);
+    for(var i=0;i<lista.length;i++) if(lista[i].id===id) return lista[i];
+    return null;
+  }
+
+  function datos(ej){
+    if(!estado.datos[ej.id]){
+      estado.datos[ej.id] = {peso:0, unidad:ej.unidad||"kg", paso:ej.paso||2, hist:[]};
+    }
+    return estado.datos[ej.id];
+  }
+
+  function esExtra(id){ return id.charAt(0) === "x"; }
+
+  function hoy(){
+    var d = new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  function fechaCorta(iso){ var p=iso.split("-"); return p[2]+"/"+p[1]; }
+  function textoFecha(iso){
+    var dias = Math.round((new Date(hoy()+"T00:00:00") - new Date(iso+"T00:00:00"))/86400000);
+    if(dias<=0) return "hoy";
+    if(dias===1) return "ayer";
+    if(dias<7) return "hace "+dias+" días";
+    return "el "+fechaCorta(iso);
+  }
+  function limpiar(n){ return (Math.round(n*100)/100).toString().replace(".",","); }
+
+  function registrar(ej, valor){
+    var d = datos(ej);
+    d.peso = valor;
+    var f = hoy();
+    var ult = d.hist[d.hist.length-1];
+    if(ult && ult.d===f) ult.p = valor;
+    else d.hist.push({d:f, p:valor});
+    if(d.hist.length>40) d.hist = d.hist.slice(-40);
+    guardar();
+  }
+
+  // ---------- render ----------
+  var nav = document.getElementById("nav");
+  var lista = document.getElementById("lista");
+
+  function pintarNav(){
+    Array.prototype.forEach.call(nav.querySelectorAll("button"), function(b){
+      b.setAttribute("aria-current", b.dataset.dia===vista ? "true" : "false");
+    });
+  }
+
+  function pintar(){
+    lista.innerHTML = "";
+    if(vista === "G"){ pintarGuia(); return; }
+
+    var dia = RUTINA[vista];
+    var cinta = document.createElement("div");
+    cinta.className = "cinta " + vista.toLowerCase();
+    cinta.innerHTML = "<b>"+dia.titulo+"</b><span>"+dia.foco+"</span>";
+    lista.appendChild(cinta);
+
+    ejerciciosDe(vista).forEach(function(ej){ lista.appendChild(tarjeta(ej)); });
+
+    var extra = document.createElement("button");
+    extra.className = "sumar";
+    extra.textContent = "+ Agregar ejercicio extra";
+    extra.addEventListener("click", abrirNuevo);
+    lista.appendChild(extra);
+
+    var pie = document.createElement("div");
+    pie.className = "bloque";
+    pie.innerHTML = "<h2>Opcional al final</h2><p>10 minutos de cinta en pendiente o bici, si te sobra tiempo.</p>";
+    lista.appendChild(pie);
+  }
+
+  function tarjeta(ej){
+    var d = datos(ej);
+    var card = document.createElement("div");
+    card.className = "ej" + (ej.prioridad ? " prioridad" : "");
+
+    var top = document.createElement("div");
+    top.className = "ej-top";
+
+    if(FIG[ej.id]){
+      var fig = document.createElement("div");
+      fig.className = "thumb";
+      fig.setAttribute("aria-hidden","true");
+      fig.innerHTML = FIG[ej.id];
+      top.appendChild(fig);
+    }
+
+    var info = document.createElement("div");
+    info.className = "ej-datos";
+    var n = document.createElement("div");
+    n.className = "ej-nombre";
+    n.textContent = ej.nombre;
+    if(ej.prioridad){
+      var et = document.createElement("span");
+      et.className = "etiqueta";
+      et.textContent = "PRIORIDAD";
+      n.appendChild(et);
+    }
+    var m = document.createElement("div");
+    m.className = "ej-musculo";
+    m.textContent = ej.musculo;
+    info.appendChild(n); info.appendChild(m);
+
+    var plan = document.createElement("div");
+    plan.className = "plan";
+    var reps = document.createElement("span");
+    reps.className = "reps";
+    reps.textContent = ej.reps;
+    var desc = document.createElement("button");
+    desc.className = "desc";
+    desc.textContent = "⏱ " + ej.desc;
+    desc.addEventListener("click", function(){ arrancarCrono(ej); });
+    plan.appendChild(reps); plan.appendChild(desc);
+    info.appendChild(plan);
+
+    var menu = document.createElement("button");
+    menu.className = "ej-menu";
+    menu.setAttribute("aria-label", "Ajustes de "+ej.nombre);
+    menu.textContent = "⋯";
+    menu.addEventListener("click", function(){ abrirEjercicio(ej.id); });
+
+    top.appendChild(info); top.appendChild(menu);
+    card.appendChild(top);
+
+    var fila = document.createElement("div");
+    fila.className = "fila";
+
+    var menos = document.createElement("button");
+    menos.className = "paso-btn";
+    menos.textContent = "−";
+    menos.setAttribute("aria-label","Restar "+limpiar(d.paso));
+    menos.addEventListener("click", function(){ cambiar(ej, -d.paso); });
+
+    var caja = document.createElement("button");
+    caja.className = "peso";
+    caja.setAttribute("aria-label","Escribir peso exacto");
+    var b = document.createElement("b"); b.textContent = limpiar(d.peso);
+    var s = document.createElement("span"); s.textContent = d.unidad;
+    caja.appendChild(b); caja.appendChild(s);
+    caja.addEventListener("click", function(){ abrirPeso(ej.id); });
+
+    var mas = document.createElement("button");
+    mas.className = "paso-btn";
+    mas.textContent = "+";
+    mas.setAttribute("aria-label","Sumar "+limpiar(d.paso));
+    mas.addEventListener("click", function(){ cambiar(ej, d.paso); });
+
+    fila.appendChild(menos); fila.appendChild(caja); fila.appendChild(mas);
+    card.appendChild(fila);
+
+    var pie = document.createElement("div");
+    pie.className = "ej-pie";
+    var txt = document.createElement("div");
+    if(d.hist.length){
+      var ult = d.hist[d.hist.length-1];
+      txt.textContent = "Guardado " + textoFecha(ult.d);
+      if(d.hist.length>1){
+        var dif = ult.p - d.hist[d.hist.length-2].p;
+        if(dif !== 0){
+          var sp = document.createElement("span");
+          sp.className = "delta " + (dif>0 ? "sube" : "baja");
+          sp.textContent = "  " + (dif>0?"+":"−") + limpiar(Math.abs(dif));
+          txt.appendChild(sp);
+        }
+      }
+    }else{
+      txt.textContent = "Sin registros todavía";
+    }
+    var ver = document.createElement("button");
+    ver.className = "ver-hist";
+    ver.textContent = abiertos[ej.id] ? "Ocultar" : "Historial";
+    pie.appendChild(txt); pie.appendChild(ver);
+    card.appendChild(pie);
+
+    var hist = document.createElement("div");
+    hist.className = "hist" + (abiertos[ej.id] ? " abierta" : "");
+    hist.appendChild(listaHistorial(d));
+    card.appendChild(hist);
+
+    ver.addEventListener("click", function(){
+      abiertos[ej.id] = !abiertos[ej.id];
+      hist.classList.toggle("abierta", !!abiertos[ej.id]);
+      ver.textContent = abiertos[ej.id] ? "Ocultar" : "Historial";
+    });
+
+    return card;
+  }
+
+  function listaHistorial(d){
+    var ul = document.createElement("ul");
+    var ultimos = d.hist.slice(-8).reverse();
+    if(!ultimos.length){
+      var li = document.createElement("li");
+      li.textContent = "Cuando cambies el peso queda anotado acá.";
+      ul.appendChild(li);
+      return ul;
+    }
+    ultimos.forEach(function(h){
+      var li = document.createElement("li");
+      var f = document.createElement("span"); f.textContent = fechaCorta(h.d);
+      var p = document.createElement("b"); p.textContent = limpiar(h.p)+" "+d.unidad;
+      li.appendChild(f); li.appendChild(p);
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  function cambiar(ej, delta){
+    var d = datos(ej);
+    var nuevo = Math.round((d.peso + delta)*100)/100;
+    if(nuevo < 0) nuevo = 0;
+    registrar(ej, nuevo);
+    pintar();
+    if(navigator.vibrate) navigator.vibrate(8);
+  }
+
+  // ---------- guía ----------
+  function pintarGuia(){
+    var fichas = document.createElement("div");
+    fichas.className = "fichas";
+    fichas.innerHTML =
+      '<div class="ficha"><b>2×</b><small>por semana</small></div>' +
+      '<div class="ficha"><b>~60′</b><small>por sesión</small></div>';
+    lista.appendChild(fichas);
+
+    var sem = document.createElement("div");
+    sem.className = "bloque";
+    var h = document.createElement("h2"); h.textContent = "Semana tipo";
+    sem.appendChild(h);
+    var grilla = document.createElement("div");
+    grilla.className = "semana";
+    SEMANA.forEach(function(x){
+      var c = document.createElement("div");
+      c.className = "dia" + (x.v==="A" ? " on-a" : x.v==="B" ? " on-b" : "");
+      var s = document.createElement("small"); s.textContent = x.d;
+      c.appendChild(s);
+      if(x.v==="A" || x.v==="B"){
+        var b = document.createElement("b"); b.textContent = x.v; c.appendChild(b);
+      }else{
+        var i = document.createElement("i"); i.textContent = x.v; c.appendChild(i);
+      }
+      grilla.appendChild(c);
+    });
+    sem.appendChild(grilla);
+    var p = document.createElement("p");
+    p.textContent = "Dejá al menos 2 días entre sesiones (también sirve Mar/Vie).";
+    sem.appendChild(p);
+    lista.appendChild(sem);
+
+    lista.appendChild(bloque("Calentamiento · 5–8 min (ambos días)", null, [
+      "Bici o cinta suave",
+      "Círculos de brazos y rotaciones con banda",
+      "Una serie liviana del primer ejercicio"
+    ]));
+
+    lista.appendChild(bloque("Cómo progresar",
+      "Terminá cada serie con 1–2 repeticiones “en el tanque”. Cuando completes todas las series en el tope del rango (ej. 3 × 12), subí un poco el peso la semana siguiente."));
+
+    lista.appendChild(bloque("No saltees",
+      "Las elevaciones laterales y los face pulls: son los que más ancho de hombros te dan y ayudan a la postura."));
+
+    lista.appendChild(bloque("Fuera del gym",
+      "Caminá 30–40 min los días libres, proteína en cada comida y buen descanso. Anotá pesos y repeticiones para ver el avance."));
+
+    lista.appendChild(bloque("Opcional al final",
+      "10 minutos de cinta en pendiente o bici, si te sobra tiempo."));
+  }
+
+  function bloque(titulo, texto, items){
+    var el = document.createElement("div");
+    el.className = "bloque";
+    var h = document.createElement("h2"); h.textContent = titulo;
+    el.appendChild(h);
+    if(texto){ var p = document.createElement("p"); p.textContent = texto; el.appendChild(p); }
+    if(items){
+      var ul = document.createElement("ul");
+      items.forEach(function(t){ var li=document.createElement("li"); li.textContent=t; ul.appendChild(li); });
+      el.appendChild(ul);
+    }
+    return el;
+  }
+
+  // ---------- cronómetro ----------
+  var crono = document.getElementById("crono");
+  var cronoCuenta = document.getElementById("cronoCuenta");
+  var cronoQue = document.getElementById("cronoQue");
+  var cronoFin = 0, cronoTick = null;
+
+  function arrancarCrono(ej){
+    var seg = ej.seg || 60;
+    cronoFin = Date.now() + seg*1000;
+    cronoQue.textContent = "Descanso · " + ej.nombre;
+    crono.classList.add("visible");
+    pintarCrono();
+    clearInterval(cronoTick);
+    cronoTick = setInterval(pintarCrono, 250);
+  }
+
+  function pintarCrono(){
+    var resto = Math.round((cronoFin - Date.now())/1000);
+    if(resto <= 0){
+      cronoCuenta.textContent = "¡Dale!";
+      clearInterval(cronoTick); cronoTick = null;
+      if(navigator.vibrate) navigator.vibrate([120,80,120]);
+      setTimeout(pararCrono, 4000);
+      return;
+    }
+    cronoCuenta.textContent = Math.floor(resto/60) + ":" + String(resto%60).padStart(2,"0");
+  }
+
+  function pararCrono(){
+    clearInterval(cronoTick); cronoTick = null;
+    crono.classList.remove("visible");
+  }
+  document.getElementById("cronoCortar").addEventListener("click", pararCrono);
+
+  // ---------- avisos ----------
+  var aviso = document.getElementById("aviso"), avisoTimer = null;
+  function avisar(txt){
+    aviso.textContent = txt;
+    aviso.classList.add("visible");
+    clearTimeout(avisoTimer);
+    avisoTimer = setTimeout(function(){ aviso.classList.remove("visible"); }, 1800);
+  }
+
+  // ---------- modal ejercicio ----------
+  var fondoEj = document.getElementById("fondoEj");
+  var fNombre = document.getElementById("fNombre");
+  var campoNombre = document.getElementById("campoNombre");
+  var fUnidad = document.getElementById("fUnidad");
+  var fPaso = document.getElementById("fPaso");
+  var fPesoEj = document.getElementById("fPesoEj");
+  var filaBorrar = document.getElementById("filaBorrar");
+
+  function abrirEjercicio(id){
+    var ej = buscar(id); if(!ej) return;
+    var d = datos(ej);
+    editandoId = id;
+    document.getElementById("tituloEj").textContent = ej.nombre;
+    campoNombre.style.display = esExtra(id) ? "block" : "none";
+    fNombre.value = ej.nombre;
+    fUnidad.value = d.unidad;
+    fPaso.value = d.paso;
+    fPesoEj.value = d.peso;
+    filaBorrar.style.display = esExtra(id) ? "flex" : "none";
+    fondoEj.classList.add("abierto");
+  }
+
+  document.getElementById("btnCancelarEj").addEventListener("click", function(){
+    fondoEj.classList.remove("abierto"); editandoId = null;
+  });
+
+  document.getElementById("btnGuardarEj").addEventListener("click", function(){
+    var ej = buscar(editandoId);
+    if(ej){
+      var d = datos(ej);
+      var paso = parseFloat(fPaso.value);
+      d.paso = (isNaN(paso) || paso<=0) ? d.paso : paso;
+      d.unidad = fUnidad.value;
+      if(esExtra(ej.id)){
+        var nom = fNombre.value.trim();
+        if(nom) ej.nombre = nom;
+      }
+      var peso = parseFloat(fPesoEj.value);
+      if(!isNaN(peso) && peso>=0 && peso!==d.peso) registrar(ej, peso);
+      guardar();
+    }
+    fondoEj.classList.remove("abierto");
+    editandoId = null;
+    pintar();
+  });
+
+  document.getElementById("btnBorrarEj").addEventListener("click", function(){
+    var ej = buscar(editandoId);
+    if(!ej || !esExtra(ej.id)) return;
+    if(!confirm("¿Borrar “"+ej.nombre+"” y su historial?")) return;
+    estado.extras = estado.extras.filter(function(e){ return e.id!==ej.id; });
+    delete estado.datos[ej.id];
+    guardar();
+    fondoEj.classList.remove("abierto");
+    editandoId = null;
+    pintar();
+    avisar("Ejercicio borrado");
+  });
+
+  // ---------- modal nuevo ----------
+  var fondoNuevo = document.getElementById("fondoNuevo");
+  function abrirNuevo(){
+    ["nNombre","nMusculo","nReps","nDesc"].forEach(function(id){ document.getElementById(id).value = ""; });
+    document.getElementById("nPeso").value = 0;
+    document.getElementById("nPaso").value = 2;
+    fondoNuevo.classList.add("abierto");
+    setTimeout(function(){ document.getElementById("nNombre").focus(); }, 60);
+  }
+  document.getElementById("btnCancelarNuevo").addEventListener("click", function(){
+    fondoNuevo.classList.remove("abierto");
+  });
+  document.getElementById("btnGuardarNuevo").addEventListener("click", function(){
+    var nom = document.getElementById("nNombre").value.trim();
+    if(!nom){ avisar("Poné un nombre"); return; }
+    var paso = parseFloat(document.getElementById("nPaso").value);
+    if(isNaN(paso) || paso<=0) paso = 2;
+    var peso = parseFloat(document.getElementById("nPeso").value);
+    if(isNaN(peso) || peso<0) peso = 0;
+    var desc = document.getElementById("nDesc").value.trim() || "60 s";
+    var seg = 60;
+    var m = desc.match(/(\d+)\s*(min|m)/i);
+    if(m) seg = parseInt(m[1],10)*60;
+    else { var s = desc.match(/(\d+)/); if(s) seg = parseInt(s[1],10); }
+
+    var ej = {
+      id:nuevoId(), dia:vista, nombre:nom,
+      musculo:document.getElementById("nMusculo").value.trim() || "Extra",
+      reps:document.getElementById("nReps").value.trim() || "3 × 10",
+      desc:desc, seg:seg, unidad:"kg", paso:paso
+    };
+    estado.extras.push(ej);
+    estado.datos[ej.id] = {peso:peso, unidad:"kg", paso:paso, hist: peso>0 ? [{d:hoy(), p:peso}] : []};
+    guardar();
+    fondoNuevo.classList.remove("abierto");
+    pintar();
+    avisar("Agregado al " + RUTINA[vista].titulo);
+  });
+
+  // ---------- peso exacto ----------
+  var fondoPeso = document.getElementById("fondoPeso");
+  var fPesoExacto = document.getElementById("fPesoExacto");
+  function abrirPeso(id){
+    var ej = buscar(id); if(!ej) return;
+    pesoId = id;
+    document.getElementById("tituloPeso").textContent = ej.nombre;
+    fPesoExacto.value = datos(ej).peso;
+    fondoPeso.classList.add("abierto");
+    setTimeout(function(){ fPesoExacto.focus(); fPesoExacto.select(); }, 60);
+  }
+  document.getElementById("btnCancelarPeso").addEventListener("click", function(){
+    fondoPeso.classList.remove("abierto"); pesoId = null;
+  });
+  document.getElementById("btnGuardarPeso").addEventListener("click", function(){
+    var ej = buscar(pesoId);
+    if(ej){
+      var v = parseFloat(fPesoExacto.value);
+      if(isNaN(v) || v<0) v = 0;
+      registrar(ej, Math.round(v*100)/100);
+      pintar();
+    }
+    fondoPeso.classList.remove("abierto"); pesoId = null;
+  });
+
+  // ---------- respaldo ----------
+  var fondoAjustes = document.getElementById("fondoAjustes");
+  var fBackup = document.getElementById("fBackup");
+  document.getElementById("btnAjustes").addEventListener("click", function(){
+    fBackup.value = JSON.stringify(estado);
+    fondoAjustes.classList.add("abierto");
+  });
+  document.getElementById("btnCerrarAjustes").addEventListener("click", function(){
+    fondoAjustes.classList.remove("abierto");
+  });
+  document.getElementById("btnCopiar").addEventListener("click", function(){
+    fBackup.removeAttribute("readonly");
+    fBackup.select(); fBackup.setSelectionRange(0, 999999);
+    var ok = false;
+    try{ ok = document.execCommand("copy"); }catch(e){}
+    fBackup.setAttribute("readonly","readonly");
+    if(!ok && navigator.clipboard){
+      navigator.clipboard.writeText(fBackup.value).then(function(){ avisar("Respaldo copiado"); });
+    }else{
+      avisar(ok ? "Respaldo copiado" : "Copialo a mano");
+    }
+  });
+  document.getElementById("btnRestaurar").addEventListener("click", function(){
+    var texto = prompt("Pegá el respaldo:");
+    if(!texto) return;
+    try{
+      var d = JSON.parse(texto);
+      if(!d || !d.datos) throw new Error("formato");
+      estado = d;
+      estado.extras = estado.extras || [];
+      vista = estado.vista || "A";
+      guardar();
+      fondoAjustes.classList.remove("abierto");
+      pintarNav(); pintar();
+      avisar("Datos restaurados");
+    }catch(e){ avisar("Ese respaldo no se pudo leer"); }
+  });
+
+  [fondoEj, fondoNuevo, fondoPeso, fondoAjustes].forEach(function(f){
+    f.addEventListener("click", function(ev){ if(ev.target===f) f.classList.remove("abierto"); });
+  });
+
+  // ---------- arranque ----------
+  Array.prototype.forEach.call(nav.querySelectorAll("button"), function(b){
+    b.addEventListener("click", function(){
+      vista = b.dataset.dia;
+      guardar(); pintarNav(); pintar();
+      window.scrollTo(0,0);
+    });
+  });
+
+  pintarNav();
+  pintar();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("./sw.js").catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>
